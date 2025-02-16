@@ -1,0 +1,14 @@
+# Ignore all files in data directories except .gitkeep
+data/pilot/**
+data/experimental/**
+!data/pilot/.gitkeep
+!data/experimental/.gitkeep
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db 
