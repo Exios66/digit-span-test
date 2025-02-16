@@ -3,25 +3,30 @@
 ## Scientific Background
 
 The Digit Span Test is a classic measure of working memory capacity, originally part of the Wechsler Adult Intelligence Scale (WAIS). It assesses both:
+
 - Forward span: immediate verbal recall
 - Backward span: working memory manipulation
 
 ## Test Administration Protocol
 
 ### 1. Test Preparation
+
 - Ensure quiet, distraction-free environment
 - Recommend fullscreen mode
 - Verify audio/visual requirements
 - Input participant ID for data tracking
 
 ### 2. Test Configuration
-#### Standard Parameters:
+
+#### Standard Parameters
+
 - Display duration: 2000ms per digit
 - Inter-trial interval: 1000ms
 - Font size: 2em for clear visibility
 - High contrast display (black on white)
 
-#### Customizable Parameters:
+#### Customizable Parameters
+
 - Display duration (500ms minimum)
 - Inter-trial interval (500ms minimum)
 - Test type (Forward/Reverse)
@@ -30,6 +35,7 @@ The Digit Span Test is a classic measure of working memory capacity, originally 
 ### 3. Test Structure
 
 #### Rounds and Progression
+
 1. **Round 1**: 3 digits
 2. **Round 2**: 4 digits
 3. **Round 3**: 5 digits
@@ -37,7 +43,9 @@ The Digit Span Test is a classic measure of working memory capacity, originally 
 5. **Round 5**: 7 digits
 
 #### Trial Structure
+
 Each round contains:
+
 1. Instructions display
 2. "Show Digits" button (participant-initiated)
 3. Digit sequence presentation
@@ -48,7 +56,8 @@ Each round contains:
 
 ### 4. Sequence Generation
 
-#### Algorithm:
+#### Algorithm
+
 ```javascript
 function generateDigits(count) {
     let digits = "";
@@ -59,7 +68,8 @@ function generateDigits(count) {
 }
 ```
 
-#### Properties:
+#### Properties
+
 - Truly random digits (0-9)
 - No repeating patterns enforced
 - Equal probability for each digit
@@ -67,24 +77,28 @@ function generateDigits(count) {
 
 ### 5. Scoring Methodology
 
-#### Success Criteria:
+#### Success Criteria
+
 - Both trials in a round must be correct
 - Exact match required (no partial credit)
 - Order matters (forward/reverse as specified)
 
-#### Termination Conditions:
+#### Termination Conditions
+
 - Incorrect response in either trial
 - Completion of all 5 rounds
 - Participant voluntary termination
 
-#### Score Calculation:
+#### Score Calculation
+
 - Final score = highest completed round
 - Maximum score = 5 (7 digits)
 - Minimum score = 0 (failed first round)
 
 ### 6. Data Collection
 
-#### Per Trial Data:
+#### Per Trial Data
+
 1. Round number
 2. Trial number
 3. Sequence length
@@ -95,7 +109,8 @@ function generateDigits(count) {
 8. Reaction time (ms)
 9. Timestamp
 
-#### Metadata:
+#### Metadata
+
 1. Participant ID
 2. Test configuration
 3. Test type (Forward/Reverse)
@@ -104,7 +119,8 @@ function generateDigits(count) {
 
 ### 7. Implementation Details
 
-#### User Interface Components:
+#### User Interface Components
+
 1. Configuration Panel
    - Input fields
    - Dropdown selections
@@ -121,13 +137,15 @@ function generateDigits(count) {
    - Data download
    - Reset option
 
-#### Error Handling:
+#### Error Handling
+
 1. Input validation
 2. Exception catching
 3. Graceful degradation
 4. User feedback
 
-#### Accessibility Features:
+#### Accessibility Features
+
 1. ARIA labels
 2. Keyboard navigation
 3. Screen reader support
@@ -135,12 +153,14 @@ function generateDigits(count) {
 
 ### 8. Data Export
 
-#### CSV Format:
+#### CSV Format
+
 ```
 ParticipantID,Round,Trial,DigitCount,Mode,Sequence,Expected,Answer,Result,ReactionTime,Timestamp
 ```
 
-#### Data Processing:
+#### Data Processing
+
 - Automatic CSV generation
 - Local download
 - UTF-8 encoding
@@ -149,13 +169,15 @@ ParticipantID,Round,Trial,DigitCount,Mode,Sequence,Expected,Answer,Result,Reacti
 
 ### 9. Quality Assurance
 
-#### Pilot Mode Features:
+#### Pilot Mode Features
+
 1. Debug logging
 2. On-screen event tracking
 3. Detailed error messages
 4. Performance monitoring
 
-#### Production Mode:
+#### Production Mode
+
 1. Clean interface
 2. Minimal distractions
 3. Error suppression
@@ -163,19 +185,22 @@ ParticipantID,Round,Trial,DigitCount,Mode,Sequence,Expected,Answer,Result,Reacti
 
 ## Methodological Considerations
 
-### Validity Measures:
+### Validity Measures
+
 1. Standardized presentation
 2. Controlled timing
 3. Accurate response recording
 4. Consistent scoring
 
-### Limitations:
+### Limitations
+
 1. Browser dependencies
 2. Hardware variations
 3. Environmental factors
 4. Internet connectivity
 
-### Best Practices:
+### Best Practices
+
 1. Use consistent testing environment
 2. Regular system validation
 3. Data backup procedures
@@ -183,19 +208,22 @@ ParticipantID,Round,Trial,DigitCount,Mode,Sequence,Expected,Answer,Result,Reacti
 
 ## Technical Implementation
 
-### Browser Requirements:
+### Browser Requirements
+
 - Modern JavaScript support
 - CSS3 compatibility
 - Local storage capability
 - Download functionality
 
-### Performance Optimization:
+### Performance Optimization
+
 1. Minimal DOM manipulation
 2. Efficient event handling
 3. Memory management
 4. Resource preloading
 
-### Security Considerations:
+### Security Considerations
+
 1. Data anonymization
 2. Local processing
 3. No external dependencies
@@ -205,4 +233,4 @@ ParticipantID,Round,Trial,DigitCount,Mode,Sequence,Expected,Answer,Result,Reacti
 
 1. Wechsler, D. (2008). Wechsler Adult Intelligence Scale–Fourth Edition (WAIS–IV). San Antonio, TX: Pearson.
 2. Miller, G. A. (1956). The magical number seven, plus or minus two: Some limits on our capacity for processing information. Psychological Review, 63(2), 81-97.
-3. Conway, A. R. A., Kane, M. J., Bunting, M. F., Hambrick, D. Z., Wilhelm, O., & Engle, R. W. (2005). Working memory span tasks: A methodological review and user's guide. Psychonomic Bulletin & Review, 12(5), 769-786. 
+3. Conway, A. R. A., Kane, M. J., Bunting, M. F., Hambrick, D. Z., Wilhelm, O., & Engle, R. W. (2005). Working memory span tasks: A methodological review and user's guide. Psychonomic Bulletin & Review, 12(5), 769-786.
