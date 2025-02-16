@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digit Span Test</title>
+  <style>
+    /* Basic Reset */
+    body, h1, h2, h3, p, input, button, select, label, div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background: #f4f4f4;
+      padding: 20px;
+      color: #333;
+    }
+    h1, h2 {
+      margin-bottom: 15px;
+    }
+    #config, #testArea, #resultArea, #debugArea {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input[type="text"], input[type="number"], select {
+      padding: 8px;
+      width: 100%;
+      max-width: 300px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      background: #007BFF;
+      color: #fff;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #digitDisplay {
+      font-size: 2em;
+      text-align: center;
+      margin: 20px 0;
+    }
+    #inputArea {
+      text-align: center;
+      margin: 20px 0;
+    }
+    #progressIndicator {
+      text-align: center;
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+    #debugArea {
+      background: #eef;
+      border: 1px solid #99c;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .help-button {
+      background: #28a745;
+    }
+    .fullscreen-button {
+      background: #6c757d;
+    }
+    /* Help Modal Styling */
+    #helpModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #helpModalContent {
+      background: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      max-width: 500px;
+      margin: auto;
+      position: relative;
+    }
+    #helpModalContent h2 {
+      margin-bottom: 10px;
+    }
+    #helpModalContent p, #helpModalContent ul {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Configuration Section -->
+  <div id="config">
+    <h1>Digit Span Test</h1>
+    <label for="participantId">Participant ID:</label>
+    <input type="text" id="participantId" placeholder="Enter participant ID" />
+
+    <label for="testMode">Test Mode:</label>
+    <select id="testMode">
+      <option value="pilot">Pilot</option>
+      <option value="production">Production</option>
+    </select>
+
+    <label for="spanType">Test Type:</label>
+    <select id="spanType">
+      <option value="forward">Forward</option>
+      <option value="reverse">Reverse</option>
+    </select>
+
+    <label for="displayDuration">Digit Display Duration (ms):</label>
+    <input type="number" id="displayDuration" value="2000" min="500" step="100" />
+
+    <label for="interTrialInterval">Inter-Trial Interval (ms):</label>
+    <input type="number" id="interTrialInterval" value="1000" min="500" step="100" />
+
+    <button id="startButton">Start Test</button>
+    <button id="helpButton" class="help-button">Help / Instructions</button>
+    <button id="fullscreenToggle" class="fullscreen-button">Toggle Fullscreen</button>
+  </div>
+
+  <!-- Testing Area -->
+  <div id="testArea" style="display:none;">
+    <div id="progressIndicator"></div>
+    <div id="instructions" aria-live="polite"></div>
+    <div id="digitDisplay" aria-live="assertive"></div>
+    <div id="inputArea" style="display:none;">
+      <input type="text" id="userInput" placeholder="Enter digits" />
+      <button id="submitAnswer">Submit</button>
+    </div>
+  </div>
+
+  <!-- Result and CSV Download -->
+  <div id="resultArea" style="display:none;">
+    <h2>Test Completed</h2>
+    <div id="finalScore"></div>
+    <button id="downloadCSV">Download CSV Log</button>
+    <button id="resetTest">Reset Test</button>
+  </div>
+
+  <!-- Debug Log Area (visible in pilot mode) -->
+  <div id="debugArea" style="display:none;">
+    <h3>Debug Log</h3>
+    <pre id="debugLog"></pre>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="helpModal">
+    <div id="helpModalContent">
+      <h2>Instructions</h2>
+      <p>This is a Digit Span Test designed to assess your short-term memory. You will see a sequence of digits for a brief period, and then you will be asked to recall them.</p>
+      <p>There are two test types:</p>
+      <ul>
+        <li><strong>Forward:</strong> Recall the digits in the order they were presented.</li>
+        <li><strong>Reverse:</strong> Recall the digits in the reverse order.</li>
+      </ul>
+      <p>The test consists of 5 rounds with 2 trials each. You must correctly recall the sequence in both trials of a round to proceed to the next round. A single mistake will end the test.</p>
+      <p>You can customize the digit display duration and the inter-trial interval using the configuration options. Additionally, your reaction time (the time between when the digits disappear and when you submit your answer) is recorded.</p>
+      <button id="closeHelp">Close</button>
+    </div>
+  </div>
+
+  <script>
+    /***********************
+     * Global Variables
+     ***********************/
+    let currentRound = 0;
+    let currentTrial = 0;
+    const totalRounds = 5;
+    let logs = []; // Log each trial and errors.
+    let participantId = "";
+    let testMode = "";
+    let spanType = ""; // "forward" or "reverse"
+    let currentSequence = "";
+    let trialStartTime = 0; // To record reaction time
+
+    /***********************
+     * Event Listeners
+     ***********************/
+    document.getElementById('startButton').addEventListener('click', startTest);
+    document.getElementById('submitAnswer').addEventListener('click', submitAnswer);
+    document.getElementById('downloadCSV').addEventListener('click', downloadCSV);
+    document.getElementById('resetTest').addEventListener('click', resetTest);
+    document.getElementById('helpButton').addEventListener('click', openHelpModal);
+    document.getElementById('closeHelp').addEventListener('click', closeHelpModal);
+    document.getElementById('fullscreenToggle').addEventListener('click', toggleFullscreen);
+
+    // Allow "Enter" key to submit answer
+    document.getElementById('userInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        submitAnswer();
+      }
+    });
+
+    /***********************
+     * Function Definitions
+     ***********************/
+
+    // Start the test: retrieve settings and initialize
+    function startTest() {
+      try {
+        participantId = document.getElementById('participantId').value.trim();
+        if (participantId === "") {
+          alert("Please enter a participant ID.");
+          return;
+        }
+        testMode = document.getElementById('testMode').value;
+        spanType = document.getElementById('spanType').value;
+        logEvent(`Test started. Participant ID: ${participantId}, Mode: ${testMode}, Type: ${spanType}`);
+
+        // Hide config and show test area.
+        document.getElementById('config').style.display = "none";
+        document.getElementById('testArea').style.display = "block";
+
+        // Initialize first round and trial.
+        currentRound = 1;
+        currentTrial = 1;
+        updateProgressIndicator();
+        runTrial();
+
+        // In pilot mode, show debug log on screen.
+        if (testMode === "pilot") {
+          document.getElementById('debugArea').style.display = "block";
+        }
+      } catch (e) {
+        handleError(e);
+      }
+    }
+
+    // Update progress indicator
+    function updateProgressIndicator() {
+      const progressText = `Round ${currentRound} of ${totalRounds} (Trial ${currentTrial} of 2)`;
+      document.getElementById('progressIndicator').innerText = progressText;
+    }
+
+    // Run a single trial (each round has two trials)
+    function runTrial() {
+      try {
+        updateProgressIndicator();
+        const digitCount = currentRound + 2; // Example: Round 1 = 3 digits, Round 2 = 4 digits, etc.
+        // Build instructions HTML with a "Show Digits" button.
+        const instructionsHTML = `
+          <p>Round ${currentRound}, Trial ${currentTrial}:</p>
+          <p>You will see a sequence of ${digitCount} digit${digitCount > 1 ? "s" : ""}.<br>
+          Please remember them ${spanType === "reverse" ? "in reverse order." : "in the same order."}</p>
+          <button id="showDigitsButton">Show Digits</button>
+        `;
+        document.getElementById('instructions').innerHTML = instructionsHTML;
+        // Clear any previous displays.
+        document.getElementById('digitDisplay').innerText = "";
+        document.getElementById('inputArea').style.display = "none";
+        document.getElementById('userInput').value = "";
+
+        // Add event listener for the new "Show Digits" button.
+        document.getElementById('showDigitsButton').addEventListener('click', function () {
+          // Disable the button to prevent multiple clicks.
+          this.disabled = true;
+          showDigits();
+        });
+      } catch (e) {
+        handleError(e);
+      }
+    }
+
+    // Generate and display a random digit sequence.
+    function showDigits() {
+      try {
+        const digitCount = currentRound + 2;
+        currentSequence = generateDigits(digitCount);
+        logEvent(`Round ${currentRound}, Trial ${currentTrial}: Generated sequence: ${currentSequence}`);
+        // Show the sequence.
+        document.getElementById('digitDisplay').innerText = currentSequence;
+        // Retrieve display duration from configuration.
+        const displayDuration = parseInt(document.getElementById('displayDuration').value, 10) || 2000;
+        setTimeout(function () {
+          document.getElementById('digitDisplay').innerText = "";
+          // After clearing digits, record the time for reaction time calculation.
+          trialStartTime = new Date().getTime();
+          document.getElementById('inputArea').style.display = "block";
+          document.getElementById('userInput').focus();
+        }, displayDuration);
+      } catch (e) {
+        handleError(e);
+      }
+    }
+
+    // Create a random string of digits of length "count"
+    function generateDigits(count) {
+      let digits = "";
+      for (let i = 0; i < count; i++) {
+        digits += Math.floor(Math.random() * 10).toString();
+      }
+      return digits;
+    }
+
+    // Process the participant's answer.
+    function submitAnswer() {
+      try {
+        const userAnswer = document.getElementById('userInput').value.trim();
+        if (userAnswer === "") {
+          alert("Please enter your answer.");
+          return;
+        }
+        // Calculate reaction time.
+        const reactionTime = new Date().getTime() - trialStartTime;
+        // Determine the expected answer based on test type.
+        const expected = spanType === "reverse"
+          ? currentSequence.split("").reverse().join("")
+          : currentSequence;
+        const isCorrect = (userAnswer === expected);
+        logEvent(`Round ${currentRound}, Trial ${currentTrial}: User answered: "${userAnswer}" | Expected: "${expected}" | ${isCorrect ? "Correct" : "Incorrect"} | Reaction Time: ${reactionTime} ms`);
+
+        // Save this trial's data.
+        logs.push({
+          round: currentRound,
+          trial: currentTrial,
+          digitCount: currentSequence.length,
+          mode: spanType,
+          sequence: currentSequence,
+          expected: expected,
+          answer: userAnswer,
+          result: isCorrect ? "Correct" : "Incorrect",
+          reactionTime: reactionTime,
+          timestamp: new Date().toISOString()
+        });
+
+        // Retrieve inter-trial interval
+        const interTrialInterval = parseInt(document.getElementById('interTrialInterval').value, 10) || 1000;
+
+        if (isCorrect) {
+          setTimeout(() => {
+            if (currentTrial === 1) {
+              currentTrial = 2;
+              runTrial();
+            } else {
+              // Both trials in the round were correct. Move to next round if available.
+              if (currentRound < totalRounds) {
+                currentRound++;
+                currentTrial = 1;
+                runTrial();
+              } else {
+                // All rounds completed successfully.
+                endTest();
+              }
+            }
+          }, interTrialInterval);
+        } else {
+          // Incorrect answer: end test immediately.
+          setTimeout(() => {
+            endTest();
+          }, interTrialInterval);
+        }
+      } catch (e) {
+        handleError(e);
+      }
+    }
+
+    // End the test and show final message and CSV download option.
+    function endTest() {
+      try {
+        logEvent(`Test ended at Round ${currentRound}, Trial ${currentTrial}`);
+        document.getElementById('testArea').style.display = "none";
+        document.getElementById('resultArea').style.display = "block";
+        document.getElementById('finalScore').innerText = `Test completed. You reached Round ${currentRound}, Trial ${currentTrial}.`;
+        if (testMode === "pilot") {
+          // In pilot mode, also show the full log.
+          document.getElementById('debugLog').innerText = logs.map(log => JSON.stringify(log)).join("\n");
+        }
+      } catch (e) {
+        handleError(e);
+      }
+    }
+
+    // Generate and trigger a CSV download of the log data.
+    function downloadCSV() {
+      try {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        // CSV header.
+        csvContent += "ParticipantID,Round,Trial,DigitCount,Mode,Sequence,Expected,Answer,Result,ReactionTime,Timestamp\n";
+        logs.forEach(function (row) {
+          // Wrap text values in quotes in case they contain commas.
+          let rowArray = [
+            participantId,
+            row.round,
+            row.trial,
+            row.digitCount,
+            row.mode,
+            `"${row.sequence}"`,
+            `"${row.expected}"`,
+            `"${row.answer}"`,
+            row.result,
+            row.reactionTime,
+            row.timestamp
+          ];
+          csvContent += rowArray.join(",") + "\n";
+        });
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${participantId}_digit_span_test_log.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (e) {
+        handleError(e);
+      }
+    }
+
+    // Reset the test to initial configuration.
+    function resetTest() {
+      try {
+        logs = [];
+        currentRound = 0;
+        currentTrial = 0;
+        currentSequence = "";
+        trialStartTime = 0;
+        // Reset view to configuration
+        document.getElementById('resultArea').style.display = "none";
+        document.getElementById('config').style.display = "block";
+        document.getElementById('testArea').style.display = "none";
+        document.getElementById('debugArea').style.display = "none";
+      } catch (e) {
+        handleError(e);
+      }
+    }
+
+    // Open Help Modal
+    function openHelpModal() {
+      document.getElementById('helpModal').style.display = "flex";
+    }
+
+    // Close Help Modal
+    function closeHelpModal() {
+      document.getElementById('helpModal').style.display = "none";
+    }
+
+    // Toggle Fullscreen Mode
+    function toggleFullscreen() {
+      try {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      } catch (e) {
+        handleError(e);
+      }
+    }
+
+    // Log events to the console (and optionally to the pilot debug log)
+    function logEvent(message) {
+      console.log(message);
+      if (testMode === "pilot") {
+        // Update debug log display if in pilot mode.
+        document.getElementById('debugLog').innerText += message + "\n";
+      }
+    }
+
+    // Generic error handling: logs error and alerts user.
+    function handleError(error) {
+      console.error(error);
+      alert("An error occurred: " + error.message);
+      logs.push({ error: error.message, timestamp: new Date().toISOString() });
+    }
+  </script>
+</body>
+</html>
