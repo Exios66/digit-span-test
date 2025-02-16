@@ -413,10 +413,15 @@
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `${participantId}_digit_span_test_log.csv`);
+        // Set the download path based on test mode
+        const directory = testMode === "pilot" ? "data/pilot" : "data/experimental";
+        link.setAttribute("download", `${directory}/${participantId}_digit_span_test_log.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        
+        // Log the save location
+        logEvent(`Data saved to ${directory}/${participantId}_digit_span_test_log.csv`);
       } catch (e) {
         handleError(e);
       }

@@ -47,6 +47,7 @@ The Digit Span Test is a widely used neuropsychological assessment that measures
 ## Data Collection
 
 The test records:
+
 - Participant ID
 - Round and trial numbers
 - Digit sequence length
@@ -67,11 +68,13 @@ The test records:
 ## Usage Modes
 
 ### Pilot Mode
+
 - Displays debug information
 - Shows detailed logs on screen
 - Useful for testing and demonstration
 
 ### Production Mode
+
 - Clean interface
 - No debug information
 - Suitable for actual assessments
@@ -79,6 +82,7 @@ The test records:
 ## Customization
 
 Adjustable parameters:
+
 - Digit display duration (milliseconds)
 - Inter-trial interval (milliseconds)
 - Test type (Forward/Reverse)
@@ -94,6 +98,7 @@ Adjustable parameters:
 ## Data Export
 
 Results are exported as CSV files containing:
+
 - Complete test configuration
 - Trial-by-trial performance
 - Timing data
@@ -103,6 +108,7 @@ Results are exported as CSV files containing:
 ## Browser Support
 
 Tested and supported on:
+
 - Chrome (latest)
 - Firefox (latest)
 - Safari (latest)
@@ -118,4 +124,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-This implementation follows standard neuropsychological assessment protocols for digit span testing, adapted for digital administration. 
+This implementation follows standard neuropsychological assessment protocols for digit span testing, adapted for digital administration.
