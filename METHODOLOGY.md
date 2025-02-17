@@ -155,7 +155,7 @@ function generateDigits(count) {
 
 #### CSV Format
 
-```
+```csv
 ParticipantID,Round,Trial,DigitCount,Mode,Sequence,Expected,Answer,Result,ReactionTime,Timestamp
 ```
 
