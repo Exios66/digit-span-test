@@ -12,49 +12,167 @@
       box-sizing: border-box;
       font-family: Arial, sans-serif;
     }
-    body {
-      background: #f4f4f4;
-      padding: 20px;
-      color: #333;
+
+    /* Dark Mode Variables */
+    :root {
+      --bg-color: #f4f4f4;
+      --text-color: #333;
+      --panel-bg: #fff;
+      --panel-border: #ccc;
+      --button-bg: #007BFF;
+      --button-hover: #0056b3;
+      --button-text: #fff;
+      --input-border: #ccc;
+      --debug-bg: #eef;
+      --debug-border: #99c;
+      --failed-color: #dc3545;
+      --modal-overlay: rgba(0,0,0,0.7);
+      --help-button: #28a745;
+      --fullscreen-button: #6c757d;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --shadow-color-dark: rgba(0, 0, 0, 0.2);
     }
+
+    /* Dark Mode Colors */
+    [data-theme="dark"] {
+      --bg-color: #1a1a1a;
+      --text-color: #f4f4f4;
+      --panel-bg: #2d2d2d;
+      --panel-border: #444;
+      --button-bg: #0056b3;
+      --button-hover: #007BFF;
+      --button-text: #fff;
+      --input-border: #444;
+      --debug-bg: #2a2a3a;
+      --debug-border: #444464;
+      --failed-color: #dc3545;
+      --modal-overlay: rgba(0,0,0,0.8);
+      --help-button: #1e7e34;
+      --fullscreen-button: #5a6268;
+      --shadow-color: rgba(0, 0, 0, 0.3);
+      --shadow-color-dark: rgba(0, 0, 0, 0.4);
+    }
+
+    /* Animation Keyframes */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    body {
+      background: var(--bg-color);
+      padding: 20px;
+      color: var(--text-color);
+      transition: all 0.3s ease;
+      min-height: 100vh;
+    }
+
     h1, h2 {
       margin-bottom: 15px;
     }
     #config, #testArea, #resultArea, #debugArea, #adminArea {
-      background: #fff;
-      border: 1px solid #ccc;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
       padding: 20px;
       margin-bottom: 20px;
-      border-radius: 5px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      transition: all 0.3s ease;
+      animation: fadeIn 0.5s ease-out;
+    }
+    #config:hover, #testArea:hover, #resultArea:hover, #debugArea:hover, #adminArea:hover {
+      box-shadow: 0 6px 12px var(--shadow-color-dark);
+      transform: translateY(-2px);
     }
     label {
       display: block;
       margin: 10px 0 5px;
     }
     input[type="text"], input[type="number"], select {
-      padding: 8px;
+      padding: 10px;
       width: 100%;
       max-width: 300px;
-      border: 1px solid #ccc;
-      border-radius: 3px;
+      border: 2px solid var(--input-border);
+      border-radius: 6px;
       margin-bottom: 10px;
+      background: var(--panel-bg);
+      color: var(--text-color);
+      transition: all 0.3s ease;
+      box-shadow: inset 0 2px 4px var(--shadow-color);
+    }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+      border-color: var(--button-bg);
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+      outline: none;
     }
     button {
-      padding: 10px 15px;
+      padding: 12px 20px;
       border: none;
-      background: #007BFF;
-      color: #fff;
-      border-radius: 3px;
+      background: var(--button-bg);
+      color: var(--button-text);
+      border-radius: 6px;
       cursor: pointer;
       margin-top: 10px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px var(--shadow-color);
+      position: relative;
+      overflow: hidden;
     }
     button:hover {
-      background: #0056b3;
+      background: var(--button-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px var(--shadow-color-dark);
+    }
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+    button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.5);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+    button:focus:not(:active)::after {
+      animation: ripple 1s ease-out;
+    }
+    @keyframes ripple {
+      0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(100, 100);
+        opacity: 0;
+      }
     }
     #digitDisplay {
-      font-size: 2em;
+      font-size: 2.5em;
       text-align: center;
       margin: 20px 0;
+      padding: 20px;
+      border-radius: 8px;
+      background: var(--panel-bg);
+      box-shadow: 0 4px 6px var(--shadow-color);
+      animation: scaleIn 0.5s ease-out;
+      transition: all 0.3s ease;
     }
     #inputArea {
       text-align: center;
@@ -63,39 +181,46 @@
     #progressIndicator {
       text-align: center;
       font-size: 1.2em;
-      margin-bottom: 10px;
-    }
-    #debugArea {
-      background: #eef;
-      border: 1px solid #99c;
-      white-space: pre-wrap;
-      max-height: 200px;
-      overflow-y: auto;
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      background: var(--panel-bg);
+      box-shadow: 0 2px 4px var(--shadow-color);
+      animation: slideIn 0.5s ease-out;
     }
     .help-button {
-      background: #28a745;
+      background: var(--help-button);
     }
     .fullscreen-button {
-      background: #6c757d;
+      background: var(--fullscreen-button);
     }
-    /* Help Modal Styling */
     #helpModal {
       display: none;
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
+      background: var(--modal-overlay);
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    #helpModal.visible {
+      opacity: 1;
     }
     #helpModalContent {
-      background: #fff;
-      padding: 20px;
-      border-radius: 5px;
+      background: var(--panel-bg);
+      color: var(--text-color);
+      padding: 25px;
+      border-radius: 8px;
       max-width: 500px;
       margin: auto;
       position: relative;
+      box-shadow: 0 10px 25px var(--shadow-color-dark);
+      transform: scale(0.95);
+      transition: all 0.3s ease;
+      animation: scaleIn 0.3s ease-out forwards;
     }
     #helpModalContent h2 {
       margin-bottom: 10px;
@@ -105,15 +230,22 @@
     }
     .admin-controls {
       margin-top: 15px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
+      padding: 15px;
+      border: 2px solid var(--panel-border);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      transition: all 0.3s ease;
+    }
+    .admin-controls:hover {
+      box-shadow: 0 6px 12px var(--shadow-color-dark);
+      transform: translateY(-2px);
     }
     .admin-input {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 15px;
+      margin-bottom: 15px;
+      animation: slideIn 0.5s ease-out;
     }
     .admin-input label {
       margin: 0;
@@ -123,11 +255,85 @@
       gap: 10px;
     }
     .failed-attempt {
-      color: #dc3545;
+      color: var(--failed-color);
+      animation: fadeIn 0.3s ease-out;
+    }
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      padding: 12px;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: var(--button-bg);
+      color: var(--button-text);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px var(--shadow-color);
+    }
+    .theme-toggle:hover {
+      background: var(--button-hover);
+      transform: scale(1.1) rotate(180deg);
+      box-shadow: 0 6px 12px var(--shadow-color-dark);
+    }
+    /* Smooth transitions for mode changes */
+    .mode-transition {
+      transition: all 0.3s ease-in-out;
+    }
+    /* Debug area enhancements */
+    #debugArea {
+      background: var(--debug-bg);
+      border: 1px solid var(--debug-border);
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: inset 0 2px 4px var(--shadow-color);
+      transition: all 0.3s ease;
+    }
+    #debugLog {
+      font-family: 'Consolas', 'Monaco', monospace;
+      line-height: 1.5;
+      padding: 10px;
+    }
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.7);
+      transform: scale(0);
+      animation: ripple-animation 0.6s linear;
+      pointer-events: none;
+    }
+
+    @keyframes ripple-animation {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    .log-entry {
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .log-entry:hover {
+      background: var(--shadow-color);
     }
   </style>
 </head>
 <body>
+  <!-- Theme Toggle Button -->
+  <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">🌓</button>
+
   <!-- Configuration Section -->
   <div id="config">
     <h1>Digit Span Test</h1>
@@ -243,6 +449,7 @@
     let userType = "participant";
     let failedAttempts = 0;
     let adminLogs = [];
+    let isDarkMode = false;
 
     /***********************
      * Event Listeners
@@ -262,6 +469,7 @@
     document.getElementById('adminNext').addEventListener('click', handleAdminNext);
     document.getElementById('saveCSV').addEventListener('click', saveCSVToRepository);
     document.getElementById('discardCSV').addEventListener('click', discardResults);
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
     // Allow "Enter" key to submit answer
     document.getElementById('userInput').addEventListener('keydown', function(e) {
@@ -308,6 +516,7 @@
         updateProgressIndicator();
         runTrial();
 
+        // Show debug area in pilot mode for both admin and participant modes
         if (testMode === "pilot") {
           document.getElementById('debugArea').style.display = "block";
         }
@@ -320,6 +529,10 @@
     function updateProgressIndicator() {
       const progressText = `Round ${currentRound} of ${totalRounds} (Trial ${currentTrial} of 2)`;
       document.getElementById('progressIndicator').innerText = progressText;
+      if (userType === "admin") {
+        document.getElementById('attemptCounter').innerHTML = failedAttempts > 0 ? 
+          `<span class="failed-attempt">Failed Attempts: ${failedAttempts}/2</span>` : '';
+      }
     }
 
     // Run a single trial (each round has two trials)
@@ -332,10 +545,18 @@
     }
 
     function runAdminTrial() {
-      currentSequence = generateDigits(currentRound + 2);
-      document.getElementById('adminDigitDisplay').textContent = currentSequence;
-      document.getElementById('participantResponse').value = '';
-      document.getElementById('failedAttempt').checked = false;
+      try {
+        updateProgressIndicator();
+        currentSequence = generateDigits(currentRound + 2);
+        document.getElementById('adminDigitDisplay').textContent = currentSequence;
+        document.getElementById('participantResponse').value = '';
+        document.getElementById('failedAttempt').checked = false;
+        
+        // Log the sequence generation in pilot mode
+        logEvent(`Round ${currentRound}, Trial ${currentTrial}: Generated sequence: ${currentSequence}`);
+      } catch (e) {
+        handleError(e);
+      }
     }
 
     function runParticipantTrial() {
@@ -466,10 +687,16 @@
         document.getElementById('testArea').style.display = "none";
         document.getElementById('adminArea').style.display = "none";
         document.getElementById('resultArea').style.display = "block";
-        document.getElementById('finalScore').innerText = completed ? `Test completed successfully! Final level reached: ${currentRound}` : `Test ended. Maximum level reached: ${currentRound - 1}`;
+        document.getElementById('finalScore').innerText = completed ? 
+          `Test completed successfully! Final level reached: ${currentRound}` : 
+          `Test ended. Maximum level reached: ${currentRound - 1}`;
+
+        // Keep debug area visible if in pilot mode
         if (testMode === "pilot") {
-          // In pilot mode, also show the full log.
-          document.getElementById('debugLog').innerText = logs.map(log => JSON.stringify(log)).join("\n");
+          document.getElementById('debugArea').style.display = "block";
+          // Show appropriate logs based on user type
+          const logsToShow = userType === 'admin' ? adminLogs : logs;
+          document.getElementById('debugLog').innerText = logsToShow.map(log => JSON.stringify(log)).join("\n");
         }
       } catch (e) {
         handleError(e);
@@ -520,29 +747,58 @@
     // Reset the test to initial configuration.
     function resetTest() {
       try {
+        // Reset all logs and counters
         logs = [];
+        adminLogs = [];
         currentRound = 0;
         currentTrial = 0;
         currentSequence = "";
         trialStartTime = 0;
-        // Reset view to configuration
+        failedAttempts = 0;
+        
+        // Reset all display areas
         document.getElementById('resultArea').style.display = "none";
         document.getElementById('config').style.display = "block";
         document.getElementById('testArea').style.display = "none";
+        document.getElementById('adminArea').style.display = "none";
         document.getElementById('debugArea').style.display = "none";
+        
+        // Reset input fields
+        document.getElementById('participantResponse').value = '';
+        document.getElementById('userInput').value = '';
+        document.getElementById('failedAttempt').checked = false;
+        
+        // Reset displays
+        document.getElementById('digitDisplay').innerText = "";
+        document.getElementById('adminDigitDisplay').textContent = "";
+        document.getElementById('attemptCounter').textContent = "";
+        document.getElementById('progressIndicator').innerText = "";
+
+        // Only hide debug area if not in pilot mode
+        if (testMode !== "pilot") {
+          document.getElementById('debugArea').style.display = "none";
+        }
       } catch (e) {
         handleError(e);
       }
     }
 
-    // Open Help Modal
+    // Open Help Modal with animation
     function openHelpModal() {
-      document.getElementById('helpModal').style.display = "flex";
+      const modal = document.getElementById('helpModal');
+      modal.style.display = "flex";
+      // Trigger reflow
+      modal.offsetHeight;
+      modal.classList.add('visible');
     }
 
-    // Close Help Modal
+    // Close Help Modal with animation
     function closeHelpModal() {
-      document.getElementById('helpModal').style.display = "none";
+      const modal = document.getElementById('helpModal');
+      modal.classList.remove('visible');
+      setTimeout(() => {
+        modal.style.display = "none";
+      }, 300); // Match transition duration
     }
 
     // Toggle Fullscreen Mode
@@ -560,45 +816,133 @@
       }
     }
 
-    // Log events to the console (and optionally to the pilot debug log)
+    // Toggle theme with smooth transition
+    function toggleTheme() {
+      document.body.classList.add('mode-transition');
+      isDarkMode = !isDarkMode;
+      
+      if (isDarkMode) {
+        document.body.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.body.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+      }
+
+      // Remove transition class after animation completes
+      setTimeout(() => {
+        document.body.classList.remove('mode-transition');
+      }, 300);
+    }
+
+    // Smooth scroll to debug area when new log is added
     function logEvent(message) {
       console.log(message);
       if (testMode === "pilot") {
-        // Update debug log display if in pilot mode.
-        document.getElementById('debugLog').innerText += message + "\n";
+        const debugLog = document.getElementById('debugLog');
+        debugLog.innerText += message + "\n";
+        
+        // Smooth scroll to bottom of debug area
+        const debugArea = document.getElementById('debugArea');
+        debugArea.scrollTo({
+          top: debugArea.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }
+
+    // Add ripple effect to buttons
+    function createRipple(event) {
+      const button = event.currentTarget;
+      const ripple = document.createElement('span');
+      const rect = button.getBoundingClientRect();
+      
+      const diameter = Math.max(rect.width, rect.height);
+      const radius = diameter / 2;
+      
+      ripple.style.width = ripple.style.height = `${diameter}px`;
+      ripple.style.left = `${event.clientX - rect.left - radius}px`;
+      ripple.style.top = `${event.clientY - rect.top - radius}px`;
+      ripple.className = 'ripple';
+      
+      button.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    }
+
+    // Add ripple effect to all buttons
+    document.querySelectorAll('button').forEach(button => {
+      button.addEventListener('click', createRipple);
+    });
+
+    // Add hover effect to debug log entries
+    function enhanceDebugLog() {
+      const debugLog = document.getElementById('debugLog');
+      const lines = debugLog.innerText.split('\n');
+      debugLog.innerHTML = lines.map(line => 
+        `<div class="log-entry">${line}</div>`
+      ).join('');
+    }
+
+    // Initialize theme with transition
+    function initializeTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('mode-transition');
+        document.body.setAttribute('data-theme', 'dark');
+        isDarkMode = true;
+        setTimeout(() => {
+          document.body.classList.remove('mode-transition');
+        }, 300);
       }
     }
 
     function handleAdminSubmit() {
-      const response = document.getElementById('participantResponse').value.trim();
-      const failed = document.getElementById('failedAttempt').checked;
-      
-      if (response === "") {
-        alert("Please enter the participant's response");
-        return;
-      }
-
-      const correct = response === currentSequence;
-      if (!correct || failed) {
-        failedAttempts++;
-        if (failedAttempts >= 2) {
-          endTest(false);
+      try {
+        const response = document.getElementById('participantResponse').value.trim();
+        const failed = document.getElementById('failedAttempt').checked;
+        
+        if (response === "") {
+          alert("Please enter the participant's response");
           return;
         }
+
+        const correct = response === (spanType === "reverse" ? 
+          currentSequence.split("").reverse().join("") : 
+          currentSequence);
+          
+        if (!correct || failed) {
+          failedAttempts++;
+          if (failedAttempts >= 2) {
+            endTest(false);
+            return;
+          }
+        }
+
+        // Log the response with consistent format
+        adminLogs.push({
+          round: currentRound,
+          trial: currentTrial,
+          digitCount: currentSequence.length,
+          mode: spanType,
+          sequence: currentSequence,
+          expected: spanType === "reverse" ? currentSequence.split("").reverse().join("") : currentSequence,
+          answer: response,
+          result: correct ? "Correct" : "Incorrect",
+          correct: correct,
+          failed: failed,
+          timestamp: new Date().toISOString()
+        });
+
+        logEvent(`Round ${currentRound}, Trial ${currentTrial}: User answered: "${response}" | Expected: "${currentSequence}" | ${correct ? "Correct" : "Incorrect"}`);
+
+        updateAttemptCounter();
+        handleAdminNext();
+      } catch (e) {
+        handleError(e);
       }
-
-      adminLogs.push({
-        round: currentRound,
-        trial: currentTrial,
-        sequence: currentSequence,
-        response: response,
-        correct: correct,
-        failed: failed,
-        timestamp: new Date().toISOString()
-      });
-
-      updateAttemptCounter();
-      handleAdminNext();
     }
 
     function handleAdminNext() {
@@ -669,21 +1013,26 @@
     }
 
     function generateCSV() {
-      const headers = ['ParticipantID', 'Round', 'Trial', 'Sequence', 'Response', 'Correct', 'Failed', 'Timestamp'];
+      const headers = ['ParticipantID', 'Round', 'Trial', 'DigitCount', 'Mode', 'Sequence', 'Expected', 'Answer', 'Result', 'Failed', 'Timestamp'];
       const rows = [headers];
       
       const logsToUse = userType === 'admin' ? adminLogs : logs;
       logsToUse.forEach(log => {
-        rows.push([
-          participantId,
-          log.round,
-          log.trial,
-          log.sequence,
-          log.response,
-          log.correct,
-          log.failed,
-          log.timestamp
-        ]);
+        if (!log.error) { // Skip error logs
+          rows.push([
+            participantId,
+            log.round,
+            log.trial,
+            log.digitCount,
+            log.mode,
+            log.sequence,
+            log.expected,
+            log.answer,
+            log.result,
+            log.failed || false,
+            log.timestamp
+          ]);
+        }
       });
       
       return rows.map(row => row.join(',')).join('\n');
@@ -701,6 +1050,9 @@
       alert("An error occurred: " + error.message);
       logs.push({ error: error.message, timestamp: new Date().toISOString() });
     }
+
+    // Call theme initialization on load
+    initializeTheme();
   </script>
 </body>
 </html>
