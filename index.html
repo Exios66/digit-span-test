@@ -332,7 +332,7 @@
     }
 
     function runAdminTrial() {
-      currentSequence = generateSequence(currentRound + 2);
+      currentSequence = generateDigits(currentRound + 2);
       document.getElementById('adminDigitDisplay').textContent = currentSequence;
       document.getElementById('participantResponse').value = '';
       document.getElementById('failedAttempt').checked = false;
