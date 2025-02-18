@@ -1,127 +1,135 @@
 # Digit Span Test
 
-A web-based implementation of the Digit Span Test, a cognitive assessment tool used to measure working memory capacity and short-term memory performance.
-
-## Overview
-
-The Digit Span Test is a widely used neuropsychological assessment that measures working memory's number storage capacity. Participants are presented with a sequence of digits and must recall them either in forward order (Forward Digit Span) or reverse order (Backward Digit Span).
+A standalone, browser-based implementation of the Digit Span Test for cognitive assessment. This application provides both participant testing and administrator modes, with built-in data collection capabilities.
 
 ## Features
 
-- Forward and Backward digit span testing modes
-- Configurable display duration and inter-trial intervals
-- Pilot and Production testing modes
-- Automatic CSV data export
+### General
+
+- Single HTML file implementation - no dependencies or server required
+- Responsive design that works on various screen sizes
 - Fullscreen mode support
-- Detailed performance logging
-- Responsive design
-- Accessible interface with ARIA support
+- Comprehensive help/instructions modal
+- Pilot and Production testing modes
 
-## Technical Requirements
+### Test Types
 
-- Modern web browser with JavaScript enabled
-- No server-side dependencies required (runs entirely in the browser)
-- Minimum screen resolution: 768x600
+- Forward Digit Span: Recall digits in the presented order
+- Reverse Digit Span: Recall digits in reverse order
 
-## Quick Start
+### User Modes
 
-1. Open `index.html` in a modern web browser
-2. Enter a participant ID
-3. Select test configuration:
-   - Test Mode (Pilot/Production)
-   - Span Type (Forward/Reverse)
-   - Display Duration
-   - Inter-Trial Interval
-4. Click "Start Test" to begin
-5. Follow on-screen instructions
-6. Download results CSV at test completion
+#### Test Taker Mode
 
-## Test Structure
+- Progressive difficulty (starting with 3 digits, increasing by 1 each round)
+- Two trials per round
+- Automatic progression/termination based on performance
+- Reaction time recording
+- Clear visual feedback
 
-- 5 rounds total
-- 2 trials per round
-- Starting with 3 digits in Round 1
-- Each round increases sequence length by 1
-- Maximum sequence length: 7 digits (Round 5)
+#### Administrator Mode
 
-## Data Collection
+- Digits remain visible on screen
+- Manual response recording
+- Failed attempt tracking (up to 2 attempts allowed)
+- Detailed data logging
+- CSV export options
 
-The test records:
+### Data Collection
 
-- Participant ID
-- Round and trial numbers
-- Digit sequence length
-- Test mode (Forward/Reverse)
-- Presented sequence
-- Expected answer
-- Participant's response
-- Accuracy (Correct/Incorrect)
-- Reaction time (milliseconds)
+- Participant ID tracking
+- Round and trial tracking
+- Sequence and response recording
+- Accuracy tracking
+- Timestamp recording
+- CSV file generation with options to:
+  - Save to local system
+  - Download directly
+  - Discard results
+
+## Usage
+
+1. Open `index.html` in a modern web browser (Chrome, Firefox, Edge, or Safari recommended)
+
+2. Configure the test:
+   - Enter Participant ID
+   - Select Test Mode (Pilot/Production)
+   - Choose Test Type (Forward/Reverse)
+   - Set Display Duration (ms)
+   - Set Inter-Trial Interval (ms)
+   - Select User Type (Test Taker/Administrator)
+
+3. Click "Start Test" to begin
+
+### Test Taker Flow
+
+1. Click "Show Digits" when ready
+2. Memorize the displayed sequence
+3. Enter the sequence when prompted
+4. Repeat for each trial/round until completion or test termination
+
+### Administrator Flow
+
+1. Observe the displayed sequence
+2. Record participant's response
+3. Mark as failed attempt if necessary
+4. Submit response or proceed to next sequence
+5. Export or save data at completion
+
+## Data Format
+
+The CSV output includes the following fields:
+
+- ParticipantID
+- Round
+- Trial
+- Sequence
+- Response
+- Correct (true/false)
+- Failed (true/false)
 - Timestamp
 
-## Scoring
+## Technical Details
 
-- Participants must correctly complete both trials in a round to advance
-- Test ends if participant fails either trial
-- Final score is the highest round completed successfully
+### Browser Requirements
 
-## Usage Modes
+- Modern browser with JavaScript enabled
+- File System Access API support for repository saving (fallback to download available)
+- Fullscreen API support for fullscreen mode
 
-### Pilot Mode
+### Data Storage
 
-- Displays debug information
-- Shows detailed logs on screen
-- Useful for testing and demonstration
+- All data is stored in-memory during the test
+- No permanent storage or cookies used
+- Data is only saved when explicitly requested via CSV export
 
-### Production Mode
+## Privacy and Security
 
-- Clean interface
-- No debug information
-- Suitable for actual assessments
+- No data is transmitted to any external servers
+- All processing occurs locally in the browser
+- No personal information is stored beyond the provided Participant ID
 
-## Customization
+## Development
 
-Adjustable parameters:
+The application is contained entirely within `index.html`, making it easy to modify and extend. The code is structured as follows:
 
-- Digit display duration (milliseconds)
-- Inter-trial interval (milliseconds)
-- Test type (Forward/Reverse)
-- Number of rounds (modifiable in code)
+- HTML: Core structure and UI elements
+- CSS: Styling and responsive design
+- JavaScript: Test logic and data handling
 
-## Accessibility
+Key JavaScript components:
 
-- ARIA labels for screen readers
-- Keyboard navigation support
-- High contrast display
-- Clear, readable fonts
-
-## Data Export
-
-Results are exported as CSV files containing:
-
-- Complete test configuration
-- Trial-by-trial performance
-- Timing data
-- Error patterns
-- Session metadata
-
-## Browser Support
-
-Tested and supported on:
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+- Test configuration and initialization
+- Sequence generation and display
+- Response handling and validation
+- Data logging and export
+- Administrator mode functions
+- Error handling and debugging
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+[Insert chosen license here]
 
-## Acknowledgments
+## Contributing
 
-This implementation follows standard neuropsychological assessment protocols for digit span testing, adapted for digital administration.
+[Insert contribution guidelines here]
