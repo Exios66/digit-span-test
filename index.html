@@ -20,7 +20,7 @@
     h1, h2 {
       margin-bottom: 15px;
     }
-    #config, #testArea, #resultArea, #debugArea {
+    #config, #testArea, #resultArea, #debugArea, #adminArea {
       background: #fff;
       border: 1px solid #ccc;
       padding: 20px;
@@ -103,6 +103,28 @@
     #helpModalContent p, #helpModalContent ul {
       margin-bottom: 10px;
     }
+    .admin-controls {
+      margin-top: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .admin-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .admin-input label {
+      margin: 0;
+    }
+    .admin-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .failed-attempt {
+      color: #dc3545;
+    }
   </style>
 </head>
 <body>
@@ -130,6 +152,12 @@
     <label for="interTrialInterval">Inter-Trial Interval (ms):</label>
     <input type="number" id="interTrialInterval" value="1000" min="500" step="100" />
 
+    <label for="userType">User Type:</label>
+    <select id="userType">
+      <option value="participant">Test Taker</option>
+      <option value="admin">Administrator</option>
+    </select>
+
     <button id="startButton">Start Test</button>
     <button id="helpButton" class="help-button">Help / Instructions</button>
     <button id="fullscreenToggle" class="fullscreen-button">Toggle Fullscreen</button>
@@ -146,11 +174,34 @@
     </div>
   </div>
 
+  <!-- Admin Area -->
+  <div id="adminArea" style="display:none;">
+    <div id="adminDigitDisplay" class="digitDisplay"></div>
+    <div class="admin-controls">
+      <div class="admin-input">
+        <input type="text" id="participantResponse" placeholder="Participant's response" />
+        <label>
+          <input type="checkbox" id="failedAttempt" />
+          Failed Attempt
+        </label>
+      </div>
+      <div class="admin-buttons">
+        <button id="adminSubmit">Submit Response</button>
+        <button id="adminNext">Next Sequence</button>
+      </div>
+    </div>
+    <div id="attemptCounter"></div>
+  </div>
+
   <!-- Result and CSV Download -->
   <div id="resultArea" style="display:none;">
     <h2>Test Completed</h2>
     <div id="finalScore"></div>
-    <button id="downloadCSV">Download CSV Log</button>
+    <div id="adminActions" style="display:none;">
+      <button id="saveCSV">Save to Repository</button>
+      <button id="downloadCSV">Download CSV</button>
+      <button id="discardCSV">Discard Results</button>
+    </div>
     <button id="resetTest">Reset Test</button>
   </div>
 
@@ -189,6 +240,9 @@
     let spanType = ""; // "forward" or "reverse"
     let currentSequence = "";
     let trialStartTime = 0; // To record reaction time
+    let userType = "participant";
+    let failedAttempts = 0;
+    let adminLogs = [];
 
     /***********************
      * Event Listeners
@@ -200,6 +254,14 @@
     document.getElementById('helpButton').addEventListener('click', openHelpModal);
     document.getElementById('closeHelp').addEventListener('click', closeHelpModal);
     document.getElementById('fullscreenToggle').addEventListener('click', toggleFullscreen);
+    document.getElementById('userType').addEventListener('change', function(e) {
+      userType = e.target.value;
+      updateUIForUserType();
+    });
+    document.getElementById('adminSubmit').addEventListener('click', handleAdminSubmit);
+    document.getElementById('adminNext').addEventListener('click', handleAdminNext);
+    document.getElementById('saveCSV').addEventListener('click', saveCSVToRepository);
+    document.getElementById('discardCSV').addEventListener('click', discardResults);
 
     // Allow "Enter" key to submit answer
     document.getElementById('userInput').addEventListener('keydown', function(e) {
@@ -212,7 +274,11 @@
      * Function Definitions
      ***********************/
 
-    // Start the test: retrieve settings and initialize
+    function updateUIForUserType() {
+      const isAdmin = userType === "admin";
+      document.getElementById('adminActions').style.display = isAdmin ? "block" : "none";
+    }
+
     function startTest() {
       try {
         participantId = document.getElementById('participantId').value.trim();
@@ -222,19 +288,26 @@
         }
         testMode = document.getElementById('testMode').value;
         spanType = document.getElementById('spanType').value;
-        logEvent(`Test started. Participant ID: ${participantId}, Mode: ${testMode}, Type: ${spanType}`);
+        userType = document.getElementById('userType').value;
+        
+        logEvent(`Test started. Participant ID: ${participantId}, Mode: ${testMode}, Type: ${spanType}, User Type: ${userType}`);
 
-        // Hide config and show test area.
+        // Hide config and show appropriate test area
         document.getElementById('config').style.display = "none";
-        document.getElementById('testArea').style.display = "block";
+        if (userType === "admin") {
+          document.getElementById('adminArea').style.display = "block";
+          failedAttempts = 0;
+          updateAttemptCounter();
+        } else {
+          document.getElementById('testArea').style.display = "block";
+        }
 
-        // Initialize first round and trial.
+        // Initialize first round and trial
         currentRound = 1;
         currentTrial = 1;
         updateProgressIndicator();
         runTrial();
 
-        // In pilot mode, show debug log on screen.
         if (testMode === "pilot") {
           document.getElementById('debugArea').style.display = "block";
         }
@@ -251,6 +324,21 @@
 
     // Run a single trial (each round has two trials)
     function runTrial() {
+      if (userType === "admin") {
+        runAdminTrial();
+      } else {
+        runParticipantTrial();
+      }
+    }
+
+    function runAdminTrial() {
+      currentSequence = generateSequence(currentRound + 2);
+      document.getElementById('adminDigitDisplay').textContent = currentSequence;
+      document.getElementById('participantResponse').value = '';
+      document.getElementById('failedAttempt').checked = false;
+    }
+
+    function runParticipantTrial() {
       try {
         updateProgressIndicator();
         const digitCount = currentRound + 2; // Example: Round 1 = 3 digits, Round 2 = 4 digits, etc.
@@ -356,14 +444,14 @@
                 runTrial();
               } else {
                 // All rounds completed successfully.
-                endTest();
+                endTest(true);
               }
             }
           }, interTrialInterval);
         } else {
           // Incorrect answer: end test immediately.
           setTimeout(() => {
-            endTest();
+            endTest(false);
           }, interTrialInterval);
         }
       } catch (e) {
@@ -372,12 +460,13 @@
     }
 
     // End the test and show final message and CSV download option.
-    function endTest() {
+    function endTest(completed) {
       try {
         logEvent(`Test ended at Round ${currentRound}, Trial ${currentTrial}`);
         document.getElementById('testArea').style.display = "none";
+        document.getElementById('adminArea').style.display = "none";
         document.getElementById('resultArea').style.display = "block";
-        document.getElementById('finalScore').innerText = `Test completed. You reached Round ${currentRound}, Trial ${currentTrial}.`;
+        document.getElementById('finalScore').innerText = completed ? `Test completed successfully! Final level reached: ${currentRound}` : `Test ended. Maximum level reached: ${currentRound - 1}`;
         if (testMode === "pilot") {
           // In pilot mode, also show the full log.
           document.getElementById('debugLog').innerText = logs.map(log => JSON.stringify(log)).join("\n");
@@ -393,7 +482,8 @@
         let csvContent = "data:text/csv;charset=utf-8,";
         // CSV header.
         csvContent += "ParticipantID,Round,Trial,DigitCount,Mode,Sequence,Expected,Answer,Result,ReactionTime,Timestamp\n";
-        logs.forEach(function (row) {
+        const logsToUse = userType === 'admin' ? adminLogs : logs;
+        logsToUse.forEach(function (row) {
           // Wrap text values in quotes in case they contain commas.
           let rowArray = [
             participantId,
@@ -476,6 +566,132 @@
       if (testMode === "pilot") {
         // Update debug log display if in pilot mode.
         document.getElementById('debugLog').innerText += message + "\n";
+      }
+    }
+
+    function handleAdminSubmit() {
+      const response = document.getElementById('participantResponse').value.trim();
+      const failed = document.getElementById('failedAttempt').checked;
+      
+      if (response === "") {
+        alert("Please enter the participant's response");
+        return;
+      }
+
+      const correct = response === currentSequence;
+      if (!correct || failed) {
+        failedAttempts++;
+        if (failedAttempts >= 2) {
+          endTest(false);
+          return;
+        }
+      }
+
+      adminLogs.push({
+        round: currentRound,
+        trial: currentTrial,
+        sequence: currentSequence,
+        response: response,
+        correct: correct,
+        failed: failed,
+        timestamp: new Date().toISOString()
+      });
+
+      updateAttemptCounter();
+      handleAdminNext();
+    }
+
+    function handleAdminNext() {
+      if (currentTrial === 2) {
+        currentTrial = 1;
+        currentRound++;
+        if (currentRound > totalRounds) {
+          endTest(true);
+          return;
+        }
+      } else {
+        currentTrial++;
+      }
+      
+      updateProgressIndicator();
+      runAdminTrial();
+    }
+
+    function updateAttemptCounter() {
+      const counter = document.getElementById('attemptCounter');
+      if (failedAttempts > 0) {
+        counter.innerHTML = `<span class="failed-attempt">Failed Attempts: ${failedAttempts}/2</span>`;
+      } else {
+        counter.textContent = '';
+      }
+    }
+
+    async function saveCSVToRepository() {
+      try {
+        const csv = generateCSV();
+        const filename = `participant_${participantId}_${new Date().toISOString().split('T')[0]}.csv`;
+        
+        // Request permission to show file picker
+        try {
+          // Create the file handle
+          const handle = await window.showSaveFilePicker({
+            suggestedName: filename,
+            types: [{
+              description: 'CSV Files',
+              accept: {
+                'text/csv': ['.csv'],
+              },
+            }],
+          });
+          
+          // Create a FileSystemWritableFileStream to write to
+          const writable = await handle.createWritable();
+          
+          // Write the contents
+          await writable.write(csv);
+          
+          // Close the file and write the contents to disk
+          await writable.close();
+          
+          alert('Results saved successfully!');
+          resetTest();
+        } catch (err) {
+          if (err.name === 'AbortError') {
+            // User cancelled the save operation
+            return;
+          }
+          throw err;
+        }
+      } catch (error) {
+        console.error('Error saving results:', error);
+        alert('Error saving results. Please try downloading instead.');
+      }
+    }
+
+    function generateCSV() {
+      const headers = ['ParticipantID', 'Round', 'Trial', 'Sequence', 'Response', 'Correct', 'Failed', 'Timestamp'];
+      const rows = [headers];
+      
+      const logsToUse = userType === 'admin' ? adminLogs : logs;
+      logsToUse.forEach(log => {
+        rows.push([
+          participantId,
+          log.round,
+          log.trial,
+          log.sequence,
+          log.response,
+          log.correct,
+          log.failed,
+          log.timestamp
+        ]);
+      });
+      
+      return rows.map(row => row.join(',')).join('\n');
+    }
+
+    function discardResults() {
+      if (confirm('Are you sure you want to discard these results? This cannot be undone.')) {
+        resetTest();
       }
     }
 
