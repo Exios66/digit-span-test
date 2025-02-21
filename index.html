@@ -646,6 +646,7 @@
           answer: userAnswer,
           result: isCorrect ? "Correct" : "Incorrect",
           reactionTime: reactionTime,
+          failed: false,
           timestamp: new Date().toISOString()
         });
 
@@ -706,39 +707,22 @@
     // Generate and trigger a CSV download of the log data.
     function downloadCSV() {
       try {
-        let csvContent = "data:text/csv;charset=utf-8,";
-        // CSV header.
-        csvContent += "ParticipantID,Round,Trial,DigitCount,Mode,Sequence,Expected,Answer,Result,ReactionTime,Timestamp\n";
-        const logsToUse = userType === 'admin' ? adminLogs : logs;
-        logsToUse.forEach(function (row) {
-          // Wrap text values in quotes in case they contain commas.
-          let rowArray = [
-            participantId,
-            row.round,
-            row.trial,
-            row.digitCount,
-            row.mode,
-            `"${row.sequence}"`,
-            `"${row.expected}"`,
-            `"${row.answer}"`,
-            row.result,
-            row.reactionTime,
-            row.timestamp
-          ];
-          csvContent += rowArray.join(",") + "\n";
-        });
-        const encodedUri = encodeURI(csvContent);
+        const csv = generateCSV();
+        const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csv);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
+        
         // Set the download path based on test mode
         const directory = testMode === "pilot" ? "data/pilot" : "data/experimental";
-        link.setAttribute("download", `${directory}/${participantId}_digit_span_test_log.csv`);
+        const timestamp = new Date().toISOString().split('T')[0];
+        link.setAttribute("download", `${directory}/${participantId}_${timestamp}_digit_span_test_log.csv`);
+        
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         
         // Log the save location
-        logEvent(`Data saved to ${directory}/${participantId}_digit_span_test_log.csv`);
+        logEvent(`Data saved to ${directory}/${participantId}_${timestamp}_digit_span_test_log.csv`);
       } catch (e) {
         handleError(e);
       }
@@ -840,7 +824,15 @@
       console.log(message);
       if (testMode === "pilot") {
         const debugLog = document.getElementById('debugLog');
-        debugLog.innerText += message + "\n";
+        const timestamp = new Date().toLocaleTimeString();
+        const formattedMessage = `[${timestamp}] ${message}`;
+        
+        // Create a new log entry with hover effect
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        logEntry.textContent = formattedMessage;
+        
+        debugLog.appendChild(logEntry);
         
         // Smooth scroll to bottom of debug area
         const debugArea = document.getElementById('debugArea');
@@ -848,6 +840,11 @@
           top: debugArea.scrollHeight,
           behavior: 'smooth'
         });
+
+        // Limit the number of log entries to prevent memory issues
+        while (debugLog.children.length > 100) {
+          debugLog.removeChild(debugLog.firstChild);
+        }
       }
     }
 
@@ -1013,7 +1010,7 @@
     }
 
     function generateCSV() {
-      const headers = ['ParticipantID', 'Round', 'Trial', 'DigitCount', 'Mode', 'Sequence', 'Expected', 'Answer', 'Result', 'Failed', 'Timestamp'];
+      const headers = ['ParticipantID', 'Round', 'Trial', 'DigitCount', 'Mode', 'Sequence', 'Expected', 'Answer', 'Result', 'ReactionTime', 'Failed', 'Timestamp'];
       const rows = [headers];
       
       const logsToUse = userType === 'admin' ? adminLogs : logs;
@@ -1029,6 +1026,7 @@
             log.expected,
             log.answer,
             log.result,
+            log.reactionTime || '',
             log.failed || false,
             log.timestamp
           ]);

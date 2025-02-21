@@ -15,6 +15,8 @@ The Digit Span Test is a classic measure of working memory capacity, originally 
 - Recommend fullscreen mode
 - Verify audio/visual requirements
 - Input participant ID for data tracking
+- Select appropriate user mode (Test Taker/Administrator)
+- Configure dark/light mode for optimal visibility
 
 ### 2. Test Configuration
 
@@ -22,8 +24,9 @@ The Digit Span Test is a classic measure of working memory capacity, originally 
 
 - Display duration: 2000ms per digit
 - Inter-trial interval: 1000ms
-- Font size: 2em for clear visibility
-- High contrast display (black on white)
+- Font size: 2.5em for clear visibility
+- High contrast display with dark mode support
+- Smooth animations and transitions
 
 #### Customizable Parameters
 
@@ -31,6 +34,8 @@ The Digit Span Test is a classic measure of working memory capacity, originally 
 - Inter-trial interval (500ms minimum)
 - Test type (Forward/Reverse)
 - Testing mode (Pilot/Production)
+- User interface theme (Light/Dark)
+- User type (Test Taker/Administrator)
 
 ### 3. Test Structure
 
@@ -49,12 +54,30 @@ Each round contains:
 1. Instructions display
 2. "Show Digits" button (participant-initiated)
 3. Digit sequence presentation
-4. Response input phase
+4. Response input phase (keyboard or mouse)
 5. Automatic validation
 6. Inter-trial interval
 7. Second trial (if first was successful)
 
-### 4. Sequence Generation
+### 4. Administration Modes
+
+#### Test Taker Mode
+
+1. Self-paced progression
+2. Automatic sequence hiding
+3. Reaction time measurement
+4. Immediate feedback
+5. Single attempt per trial
+
+#### Administrator Mode
+
+1. Continuous sequence display
+2. Manual response recording
+3. Failed attempt tracking
+4. Two attempts allowed
+5. Manual progression control
+
+### 5. Sequence Generation
 
 #### Algorithm
 
@@ -74,28 +97,27 @@ function generateDigits(count) {
 - No repeating patterns enforced
 - Equal probability for each digit
 - New sequence for each trial
+- Consistent display formatting
 
-### 5. Scoring Methodology
+### 6. Response Handling
 
-#### Success Criteria
+#### Test Taker Mode
 
-- Both trials in a round must be correct
-- Exact match required (no partial credit)
-- Order matters (forward/reverse as specified)
+1. Automatic sequence hiding
+2. Reaction time recording
+3. Enter key support
+4. Immediate validation
+5. Automatic progression
 
-#### Termination Conditions
+#### Administrator Mode
 
-- Incorrect response in either trial
-- Completion of all 5 rounds
-- Participant voluntary termination
+1. Manual response entry
+2. Failed attempt marking
+3. Enter key support
+4. Multiple attempt tracking
+5. Manual progression
 
-#### Score Calculation
-
-- Final score = highest completed round
-- Maximum score = 5 (7 digits)
-- Minimum score = 0 (failed first round)
-
-### 6. Data Collection
+### 7. Data Collection
 
 #### Per Trial Data
 
@@ -107,7 +129,9 @@ function generateDigits(count) {
 6. Actual response
 7. Accuracy (correct/incorrect)
 8. Reaction time (ms)
-9. Timestamp
+9. Failed attempt status
+10. Timestamp
+11. User mode
 
 #### Metadata
 
@@ -116,118 +140,155 @@ function generateDigits(count) {
 3. Test type (Forward/Reverse)
 4. Display duration
 5. Inter-trial interval
+6. User mode
+7. Theme preference
 
-### 7. Implementation Details
+### 8. User Interface Components
 
-#### User Interface Components
+#### Common Elements
 
 1. Configuration Panel
-   - Input fields
-   - Dropdown selections
-   - Control buttons
+   - Input validation
+   - Mode selection
+   - Theme toggle
+   - Help access
 
 2. Test Display
    - Progress indicator
    - Instruction area
    - Digit display
    - Input area
+   - Keyboard support
 
 3. Results Panel
    - Score display
-   - Data download
-   - Reset option
+   - Data export options
+   - Reset functionality
 
-#### Error Handling
+#### Mode-Specific Elements
 
-1. Input validation
-2. Exception catching
-3. Graceful degradation
-4. User feedback
+1. Test Taker Mode
+   - Hidden sequence display
+   - Reaction time tracking
+   - Automatic progression
 
-#### Accessibility Features
+2. Administrator Mode
+   - Visible sequence display
+   - Failed attempt checkbox
+   - Manual progression
+   - Extended data options
 
-1. ARIA labels
-2. Keyboard navigation
-3. Screen reader support
-4. Responsive design
+### 9. Visual Design
 
-### 8. Data Export
+#### Theme Support
+
+1. Light Mode
+   - High contrast
+   - Neutral background
+   - Clear typography
+   - Subtle shadows
+
+2. Dark Mode
+   - Reduced eye strain
+   - Dark background
+   - Adjusted contrast
+   - Enhanced shadows
+
+#### Animations
+
+1. Interface Transitions
+   - Smooth mode switching
+   - Element fade-in/out
+   - Button interactions
+   - Progress updates
+
+2. Feedback Effects
+   - Input validation
+   - Error states
+   - Success indicators
+   - Loading states
+
+### 10. Debug Features
+
+#### Pilot Mode
+
+1. Real-time Logging
+   - Timestamped entries
+   - Formatted output
+   - Auto-scrolling
+   - Entry limiting
+
+2. Error Tracking
+   - Detailed messages
+   - Stack traces
+   - State information
+   - Recovery options
+
+### 11. Data Export
 
 #### CSV Format
 
 ```csv
-ParticipantID,Round,Trial,DigitCount,Mode,Sequence,Expected,Answer,Result,ReactionTime,Timestamp
+ParticipantID,Round,Trial,DigitCount,Mode,Sequence,Expected,Answer,Result,ReactionTime,Failed,Timestamp
 ```
 
-#### Data Processing
+#### Export Options
 
-- Automatic CSV generation
-- Local download
-- UTF-8 encoding
-- Comma-separated values
-- Quote-wrapped text fields
+1. Local Download
+   - Automatic naming
+   - Date stamping
+   - Mode-specific paths
+   - UTF-8 encoding
 
-### 9. Quality Assurance
+2. Repository Save
+   - File picker API
+   - Error handling
+   - Success confirmation
+   - Automatic reset
 
-#### Pilot Mode Features
+### 12. Implementation Considerations
 
-1. Debug logging
-2. On-screen event tracking
-3. Detailed error messages
-4. Performance monitoring
+#### Browser Support
 
-#### Production Mode
+1. Modern Features
+   - File System Access API
+   - Local Storage
+   - CSS Variables
+   - Smooth Scrolling
 
-1. Clean interface
-2. Minimal distractions
-3. Error suppression
-4. Optimized performance
+2. Fallbacks
+   - Download fallback
+   - Theme persistence
+   - Animation support
+   - Input handling
 
-## Methodological Considerations
+#### Performance
 
-### Validity Measures
+1. Memory Management
+   - Log entry limiting
+   - DOM optimization
+   - Event delegation
+   - Resource cleanup
 
-1. Standardized presentation
-2. Controlled timing
-3. Accurate response recording
-4. Consistent scoring
+2. Animation Performance
+   - Hardware acceleration
+   - Transition batching
+   - Paint optimization
+   - Layout triggers
 
-### Limitations
+### 13. Security Measures
 
-1. Browser dependencies
-2. Hardware variations
-3. Environmental factors
-4. Internet connectivity
+1. Data Protection
+   - Local processing
+   - No external calls
+   - Minimal storage
+   - Safe file handling
 
-### Best Practices
-
-1. Use consistent testing environment
-2. Regular system validation
-3. Data backup procedures
-4. Participant instruction standardization
-
-## Technical Implementation
-
-### Browser Requirements
-
-- Modern JavaScript support
-- CSS3 compatibility
-- Local storage capability
-- Download functionality
-
-### Performance Optimization
-
-1. Minimal DOM manipulation
-2. Efficient event handling
-3. Memory management
-4. Resource preloading
-
-### Security Considerations
-
-1. Data anonymization
-2. Local processing
-3. No external dependencies
-4. Secure data handling
+2. Input Validation
+   - Sanitized input
+   - Type checking
+   - Length limits
+   - Error boundaries
 
 ## References
 
